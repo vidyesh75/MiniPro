@@ -1,0 +1,119 @@
+--------------------------------------------Overview----------------------------------
+// javascript is a functional programming language so our program must be broken into some of functions
+// our program consists of 3 parts
+//	part I  : Generate Prime Implicants
+//	part II : Essential implicants , Row dominance and column dominance
+//	part III: Petrick method
+
+-------------------------------------------Part I-------------------------------------
+// we will need 2 objects (= 2 Constructor Functions) : Implicant , Group
+
+1st constructor function Implicant(base_value,haming_distances,checked,dont_care)
+	// int var base_value
+	// int[] var haming_distances --> initially empty
+	// boolean var checked --> initially false
+	// boolean var dont_care
+	// int var degree = function(){ // return number of 1s }
+
+2nd constructor function Group(degree,Members)
+	// int var degree
+	// Implicant[] var Members
+
+function readInputs()
+	// store inputs in text field in a string var
+
+function validInputs()
+	// Validates the input take from readInputs() and returns a boolean value
+	// should check that the user enters only numbers with commas and spaces as separators
+	// should check that any minterm is entered only once (no term is in both minterm input and dontcare input)
+
+function generateImplicants(string var)
+	// each number in string var is a minterm (Implicant)
+	// this function handles these minterms and return Array of objects (Implicants)
+
+function generateGroups(Array of Implicants)
+	// this function devides Implicants into groups depending on implicant degree
+	// return array of objects (Groups)
+
+function groupingProcess(array of Groups)
+	// execute process to generate new array of implicants
+	// add unchecked implicants to array of prime implicants
+	// while (new array of implicants is not empty)
+	// grouping process(generateGroups(array of implicants))
+
+// we finished part I of our program
+// now we have an array of prime implicants on which we will work in part II
+
+
+------------------------------------------part II--------------------------------------
+
+//we'll need an array to store the resulting implicants of the minimal function
+array resultImplicants
+
+//we can use a series of boolean-type functions:
+
+function checkEssentialImplicant(Array of prime implicants, Array of minterms)
+	//checks if a minterm is only covered by one implicant
+	//if found, add the implicant to  resultImplicants and return true
+	//if not found return false
+
+function checkRowDominance(Array of prime implicants, Array of minterms)
+	//checks if a prime implicant covers all the terms of another
+	//removes the redundant implicant frome the array of prime implicants and returns true
+	//returns false if no row dominance found
+
+function checkColumnDominance(Array of prime implicants, Array of minterms)
+	//checks if a minterm is coverd by the same (or more) implicants that cover another minterm
+	//removes the redundant term from the array of minterms and returns true
+	//returns false if no column dominance found
+
+
+//this process will be repeated till at somepoint, all the checks return false
+
+//e.g.	while(checkEssentialImplicant || checkRowDominance() || checkColumnDominance()) { }
+
+//the loop only stops when the three checks fail.
+//if the array of minterms is empty, this means all of them are covered and so we return the output to the user
+
+//if some minterms remain, we'll use petrick method in part III
+
+------------------------------------------part III--------------------------------------
+// stay tuned :P
+
+
+
+
+
+
+
+-----------------------------------------old plan--------------------------------------
+//degree is the number of 1s in the base value of an implicant
+
+class Implicant
+	member integer base value
+	member integer collection of ba2eet el 7agat
+	member boolean checked initially false
+	member boolean don't care
+	member integer degree 
+	
+
+	method that counts bits of base value to set degree
+	
+
+class Group
+	member integer degree
+	member integer 
+	member collection of implicants
+
+	method constructor Group(implicants)
+			
+
+class GroupList
+	member integer order
+
+-Function that takes minterms and don't cares, converts them some form
+-Function that groups minterms and implicants, checking redundant implicants
+-organise remaiining (unchecked) prime implicants
+-row dominance and column dominance
+-petrick method
+-output
