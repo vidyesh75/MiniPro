@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="icon" href="./images/logo.png">
+
+    <!-- bootstrap css -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <!-- stylesheet -->
+    <link rel="stylesheet" href="./css/styles.css">
+
+    <title>Digital Logic Simplifier</title>
+</head>
+
+<body>
+
+  <h1>Simplification using KMap & Tabulation</h1>
+
+  <div class="container p-4 mt-5 information">
+      <form>
+          <div class="row">
+              <div class="col-2"></div>
+              <div class="col-4 text-center">
+                  <div class="mb-3 p-4 bg-light input-box">
+                      <label for="inputName" class="form-label">Input Names</label>
+                      <div id="variables" class="form-text">Variable names separated by comma</div>
+                      <input type="text" class="form-control" id="inputName" aria-describedby="variables"
+                             placeholder="ex. a,b,c ..." autocomplete="off" required>
+                  </div>
+              </div>
+              <div class="col-4 text-center form-check">
+                  <div class="mb-3 p-4 bg-light input-box">
+                      <label for="select" class="form-label">Term format</label>
+                      <div id="format" class="form-text">Select minterm or maxterm as input type</div>
+                      <select id="select" class="form-select text-black">
+                          <option value="minterm">Minterm</option>
+                          <option value="maxterm">Maxterm</option>
+                      </select>
+                  </div>
+              </div>
+              <div class="col-2"></div>
+          </div>
+
+          <div class="row mt-2">
+              <div class="col-2"></div>
+              <div class="col-4 text-center">
+                  <div class="mb-3 p-4 bg-light input-box">
+                      <label for="allTerms" class="form-label">Minterms/Maxterms</label>
+                      <div id="terms" class="form-text">Values separated by comma</div>
+                      <input type="text" class="form-control" id="allTerms" aria-describedby="terms"
+                             placeholder="ex. 2,4,5 ..." autocomplete="off" required>
+                  </div>
+              </div>
+              <div class="col-4 text-center form-check">
+                  <div class="mb-3 p-4 bg-light input-box">
+                      <label for="dontcares" class="form-label">don't cares</label>
+                      <div id="dontcareTerms" class="form-text">Values separated by comma</div>
+                      <input type="text" class="form-control" id="dontcares" aria-describedby="terms"
+                             placeholder="ex. 1,4,7 ..." autocomplete="off">
+                  </div>
+              </div>
+              <div class="col-2"></div>
+          </div>
+
+          <div class="row mt-3 p-4">
+              <div class="col-4"></div>
+              <div class="col-4">
+                  <label class="form-label">Select the form of simplified expression</label>
+              </div>
+              <div class="col-4"></div>
+          </div>
+
+          <div class="row text-center">
+              <div class="col-4"></div>
+              <div class="col-2 text-center">
+                  <div class="form-check form-check-inline">
+                     <label class="form-check-label" for="SOPRadio">Sum Of Products
+                        <input class="form-check-input" type="radio" id="SOPRadio" value="SOP" name="SOPorPOS">
+                     </label>
+                 </div>
+              </div>
+
+              <div class="col-2 text-center">
+                 <div class="form-check form-check-inline">
+                     <label class="form-check-label" for="POSRadio">Product of Sums
+                         <input class="form-check-input" type="radio" id="POSRadio" value="POS" name="SOPorPOS">
+                     </label>
+                 </div>
+              </div>
+              <div class="col-4"></div>
+          </div>
+
+          <div class="row mt-5 text-center">
+              <div class="col-5"></div>
+              <div class="col-2">
+                <button type="submit" class="btn btn-secondary submitBtn">Solve Now!</button>
+              </div>
+              <div class="col-5"></div>
+          </div>
+      </form>
+      <hr>
+  </div>
+
+  <div class="container mt-5 mb-5 kmap">
+
+  </div>
+
+  
+
+  <!-- Modal Alert Window for fetch error ---->
+  <div class='modal fade fetch__modal' tabindex='-1'>
+      <div class='modal-dialog modal-fullscreen-md-down'>
+          <div class='modal-content p-2'>
+              <div class='modal-header'>
+                  <h3 class='modal-title text-info'>Error!!</h3>
+                  <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+              </div>
+              <div class='modal-body text-secondary'>
+                  <p class='fetch__error'></p>
+              </div>
+              <div class='modal-footer'>
+                  <button type='button' class='btn-lg btn-secondary modalBtn' data-bs-dismiss='modal'><h4>OK</h4></button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- templates -->
+
+  <!-- Kmap template -->
+  <script id="kmap-template" type="text/html">
+      <div class="container m-2 p-4 text-center">
+          <h1 class="text-secondary pb-5">Karnaugh Map</h1>
+        <table class="table table-hover table-bordered table-light border-secondary">
+          <thead>
+          <tr>
+              <th scope="col"><h2 class="text-secondary">({{rowInputNames}}) // ({{colInputNames}})</h2></th>
+              {{#colArr}}
+              <th scope="col">{{.}}</th>
+              {{/colArr}}
+          </tr>
+          </thead>
+          <tbody>
+          {{#combinedArr}}
+          <tr>
+              <th scope="row">{{rowName}}</th>
+              {{#cellVals}}
+              {{#color}}
+              <td class="table-{{color}}">{{value}}</td>
+              {{/color}}
+              {{^color}}
+              <td>{{value}}</td>
+              {{/color}}
+              {{/cellVals}}
+          </tr>
+          {{/combinedArr}}
+          </tbody>
+       </table>
+      </div>
+  </script>
+
+  <!-- PI table template -->
+  <script id="quine-template" type="text/html">
+      <div class="hide">
+          <h1 class="hide">Quine-McCluskey Solver</h1>
+          <table class="hide">
+              <thead>
+              <tr>
+                  {{#headerNames}}
+                  <th scope="col">{{.}}</th>
+                  {{/headerNames}}
+              </tr>
+              </thead>
+              <tbody>
+              {{#QMTableValues}}
+              <tr>
+                  {{#.}}
+                   <td>
+                       {{#.}}
+                       <span class="hide">(
+                       <b>{{decimalMinterms}}</b>
+                       )</span> ⇒
+                       {{term}}
+                       {{#IsUsed}}
+                       <span class="hide"><b>;</b></span>
+                       {{/IsUsed}}
+                       {{^IsUsed}}
+                       {{/IsUsed}}
+                       <br>
+                       {{/.}}
+                   </td>
+                  {{/.}}
+              </tr>
+              {{/QMTableValues}}
+              </tbody>
+          </table>
+      </div>
+  </script>
+
+  <!-- Coverage Table template -->
+  <script id="coverage-template" type="text/html">
+      <div class="hide">
+          <h1 class="hide">Coverage Table</h1>
+          <table class="hide">
+              <thead>
+              <tr>
+                  <th scope="col"><h2 class="hide">(PIs) // (Minterms)</h2></th>
+                  {{#minterms}}
+                  <th scope="col">{{.}}</th>
+                  {{/minterms}}
+              </tr>
+              </thead>
+              <tbody>
+              {{#combinedPIs}}
+              <tr>
+                  {{#IsEPI}}
+                  <th scope="row"><span class="hide"><b>&#10003;</b></span>&nbsp;{{rowName}}</th>
+                  {{/IsEPI}}
+                  {{^IsEPI}}
+                  <th scope="row">{{rowName}}</th>
+                  {{/IsEPI}}
+                  {{#responsibleFor}}
+                  {{#color}}
+                  <td class="hide">;</td>
+                  {{/color}}
+                  {{^color}}
+                  <td></td>
+                  {{/color}}
+                  {{/responsibleFor}}
+              </tr>
+              {{/combinedPIs}}
+              </tbody>
+          </table>
+      </div>
+  </script>
+
+  <!-- Answer template -->
+  <script id="answer-template" type="text/html">
+      <div class="answer bg-light mt-5 p-5 text-dark">
+          <h1 class="text-secondary">Answer</h1>
+          <p>
+          <h3><b>Prime Implicants:</b></h3>
+          <span class="PIs text-secondary">{{PIs}}</span>
+          </p>
+
+          <p>
+          <h3><b>Essential Prime Implicants:</b></h3>
+          <span class="EPIs text-secondary">{{EPIs}}</span>
+          </p>
+
+          <p>
+          <h3><b>Solution(Simplified):</b></h3>
+          <span class="solutions text-secondary">{{solution}}</span>
+          </p>
+      </div>
+  </script>
+
+  <!-- bootstrap script -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+  <!-- mustache script -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
+
+  <!-- internal scripts -->
+  <script type="module" src="js/script.js"></script>
+  <script type="module" src="js/KMapSolver/FinalSolver.js"></script>
+  <script type="module" src="js/KMapSolver/KMapBuilder.js"></script>
+  <script type="module" src="js/KMapSolver/PrimeImplicants.js"></script>
+  <script type="module" src="js/KMapSolver/EssentialPrimeImplicants.js"></script>
+  <script type="module" src="js/KMapSolver/SolutionBuilder.js"></script>
+  <script type="module" src="js/QuineMcCluskeyTable.js"></script>
+
+</body>
+</html>
